@@ -1,6 +1,5 @@
 import pytest
 from fastapi import status
-from app.services.otp import save_otp
 from app.core.security import verify_password
 from app.core.redis_client import get_redis
 

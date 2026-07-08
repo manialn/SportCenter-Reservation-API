@@ -20,9 +20,9 @@ from app.core.redis_client import get_redis
 from app.core.security import hash_password
 from app.core.token import create_access_token, create_refresh_token
 from app.database import Base, get_db
-from app.enumsfile.enum import UserRole
+from app.enumsfile.enum import UserRole,FacilityType
 from app.main import app
-from app.models import User
+from app.models import User,Facility
 
 
 @pytest_asyncio.fixture(scope="session")
@@ -177,6 +177,41 @@ async def authorized_client(client, access_token):
         }
     )
     return client
+
+@pytest_asyncio.fixture
+async def authorized_admin_client(client, admin_access_token):
+    client.headers.update(
+        {
+            "Authorization": f"Bearer {admin_access_token}",
+        }
+    )
+    return client
+
+@pytest_asyncio.fixture
+async def facility_factory(db_session):
+    async def create_facility(
+        name=None,
+        description=None,
+        facility_type=FacilityType.FOOTBALL,
+        price_per_hour=100,
+        is_active=True,
+    ):
+        facility = Facility(
+            name=name or f"facility_{uuid.uuid4().hex[:8]}",
+            description=description,
+            facility_type=facility_type,
+            price_per_hour=price_per_hour,
+            is_active=is_active,
+        )
+
+        db_session.add(facility)
+
+        await db_session.commit()
+        await db_session.refresh(facility)
+
+        return facility
+
+    return create_facility
     
 
 

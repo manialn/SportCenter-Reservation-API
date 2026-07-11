@@ -4,7 +4,7 @@ from sqlalchemy import Column,Integer,String,Boolean,ForeignKey,DateTime,Text,En
 from sqlalchemy.sql import func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
-from app.enumsfile.enum import UserRole,FacilityType,BookingStatus,PaymentMethod,PaymentStatus
+from app.enumsfile.enum import UserRole,FacilityType,BookingStatus,PaymentMethod,PaymentStatus,WeekDay
 
 class TimestampMixin:
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
@@ -69,12 +69,20 @@ class FacilitySchedule(Base, TimestampMixin):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     facility_id = Column(UUID(as_uuid=True), ForeignKey("facility.id", ondelete="CASCADE"), nullable=False)
-    day_of_week = Column(Integer, nullable=False)
+    day_of_week = Column(Enum(WeekDay), nullable=False)
     open_time = Column(Time, nullable=False)
     close_time = Column(Time, nullable=False)
     slot_duration = Column(Integer, nullable=False)
     price_override = Column(Numeric(10, 2), nullable=True)
     is_active = Column(Boolean, default=True, nullable=False)
+
+    __table_args__ = (
+    UniqueConstraint(
+        "facility_id",
+        "day_of_week",
+        name="uq_facility_schedule_day"
+    ),
+)
 
     facility = relationship("Facility", back_populates="schedules")
 

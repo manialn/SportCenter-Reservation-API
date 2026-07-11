@@ -14,7 +14,6 @@ logger = get_logger(__name__)
 
 @log_calls
 async def register_user(username: str, phone_number: str, password: str, db: AsyncSession):
-    logger.info("Register attempt username=%s phone_number=%s", username, phone_number)
 
     result = await db.execute(
         select(User).where(
@@ -26,7 +25,7 @@ async def register_user(username: str, phone_number: str, password: str, db: Asy
     user_exist = result.scalar_one_or_none()
 
     if user_exist:
-        logger.warning("Register failed user already exists username=%s phone_number=%s", username, phone_number)
+        logger.warning("Register failed user already exists username=%s", username)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Username or phonenumber already exists")
 
     create_user = User(
@@ -42,7 +41,7 @@ async def register_user(username: str, phone_number: str, password: str, db: Asy
         logger.info("User registered successfully user_id=%s username=%s", create_user.id, create_user.username)
     except Exception:
         await db.rollback()
-        logger.error("Register transaction failed username=%s phone_number=%s", username, phone_number)
+        logger.error("Register transaction failed username=%s", username)
         raise
 
     return {"message": "User created successfully"}
@@ -50,7 +49,7 @@ async def register_user(username: str, phone_number: str, password: str, db: Asy
 
 @log_calls
 async def authentication_user(identifier: str, password: str, db: AsyncSession):
-    logger.info("Authentication attempt identifier=%s", identifier)
+    logger.info("Authentication attempt")
 
     result = await db.execute(
         select(User).where(
@@ -62,7 +61,7 @@ async def authentication_user(identifier: str, password: str, db: AsyncSession):
     user = result.scalar_one_or_none()
 
     if not user or not verify_password(password, user.hashed_password):
-        logger.warning("Authentication failed identifier=%s", identifier)
+        logger.warning("Authentication failed")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
     logger.info("Authentication successful user_id=%s", user.id)
@@ -72,7 +71,6 @@ async def authentication_user(identifier: str, password: str, db: AsyncSession):
 
 @log_calls
 async def login_user(form_data: OAuth2PasswordRequestForm, db: AsyncSession):
-    logger.info("Login request identifier=%s", form_data.username)
 
     user = await authentication_user(form_data.username, form_data.password, db)
 

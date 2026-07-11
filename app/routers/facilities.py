@@ -1,7 +1,7 @@
 from fastapi import APIRouter,status,Query
 from uuid import UUID
 from typing import Optional
-from app.core.dependency import db_dependency,user_dependency,admin_dependency
+from app.core.dependency import db_dependency,admin_dependency
 from app.schemas.facility import FacilityListResponse,FacilityResponse,FacilityCreateRequest,FacilityUpdateRequest
 from app.services.facility_services import (
 get_facilities_service,get_facility_detail_service,create_facility_service,update_facility_service

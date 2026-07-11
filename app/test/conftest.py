@@ -2,10 +2,8 @@ import os
 
 os.environ["ENV_FILE"] = ".env.test"
 
-from contextlib import AsyncExitStack
-from datetime import timedelta
+from datetime import timedelta,time
 import uuid
-
 import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import (
@@ -20,9 +18,9 @@ from app.core.redis_client import get_redis
 from app.core.security import hash_password
 from app.core.token import create_access_token, create_refresh_token
 from app.database import Base, get_db
-from app.enumsfile.enum import UserRole,FacilityType
+from app.enumsfile.enum import UserRole,FacilityType,WeekDay
 from app.main import app
-from app.models import User,Facility
+from app.models import User,Facility,FacilitySchedule
 
 
 @pytest_asyncio.fixture(scope="session")
@@ -212,6 +210,36 @@ async def facility_factory(db_session):
         return facility
 
     return create_facility
+
+@pytest_asyncio.fixture
+async def facility_schedule_factory(db_session):
+    async def create_schedule(
+        facility_id,
+        day_of_week=WeekDay.MONDAY,
+        open_time=time(8, 0),
+        close_time=time(22, 0),
+        slot_duration=60,
+        price_override=None,
+        is_active=True,
+    ):
+        schedule = FacilitySchedule(
+            facility_id=facility_id,
+            day_of_week=day_of_week,
+            open_time=open_time,
+            close_time=close_time,
+            slot_duration=slot_duration,
+            price_override=price_override,
+            is_active=is_active,
+        )
+
+        db_session.add(schedule)
+
+        await db_session.commit()
+        await db_session.refresh(schedule)
+
+        return schedule
+
+    return create_schedule
     
 
 

@@ -32,19 +32,6 @@ async def test_register_duplicate_username(client, test_user):
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {"detail": "Username or phonenumber already exists"}
 
-@pytest.mark.asyncio
-async def test_register_duplicate_username(client, test_user):
-    response = await client.post(
-        "/auth/register",
-        json={
-            "username": test_user.username,
-            "phone_number": "09123456789",
-            "password": "12345678",
-        },
-    )
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json() == {"detail": "Username or phonenumber already exists"}
 
 @pytest.mark.asyncio
 async def test_register_duplicate_phone_number(client, test_user):

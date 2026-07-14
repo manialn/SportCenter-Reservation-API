@@ -92,7 +92,7 @@ class Booking(Base, TimestampMixin):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id = Column(UUID(as_uuid=True), ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
-    timeslot_id = Column(UUID(as_uuid=True), ForeignKey("timeslot.id", ondelete="CASCADE"), nullable=False)
+    timeslot_id = Column(UUID(as_uuid=True), ForeignKey("timeslot.id", ondelete="CASCADE"), nullable=False, unique=True)
     booking_status = Column(Enum(BookingStatus), default=BookingStatus.PENDING, nullable=False)
     total_price = Column(Numeric(10,2), nullable=False)
 

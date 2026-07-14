@@ -3,6 +3,7 @@ import os
 os.environ["ENV_FILE"] = ".env.test"
 
 from datetime import timedelta,time
+from datetime import date as dt_date, time as dt_time
 import uuid
 import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
@@ -20,7 +21,7 @@ from app.core.token import create_access_token, create_refresh_token
 from app.database import Base, get_db
 from app.enumsfile.enum import UserRole,FacilityType,WeekDay
 from app.main import app
-from app.models import User,Facility,FacilitySchedule
+from app.models import User,Facility,FacilitySchedule,TimeSlot
 
 
 @pytest_asyncio.fixture(scope="session")
@@ -240,6 +241,37 @@ async def facility_schedule_factory(db_session):
         return schedule
 
     return create_schedule
+
+@pytest_asyncio.fixture
+async def timeslot_factory(db_session):
+    
+    async def create_timeslot(
+        facility_id,
+        date=None,
+        start_time=None,
+        end_time=None,
+        is_active=True,
+    ):
+        final_date = date or dt_date(2026, 7, 13)
+        final_start = start_time or dt_time(9, 0)
+        final_end = end_time or dt_time(10, 0)
+
+        timeslot = TimeSlot(
+            facility_id=facility_id,
+            date=final_date,
+            start_time=final_start,
+            end_time=final_end,
+            is_active=is_active,
+        )
+
+        db_session.add(timeslot)
+        await db_session.commit()
+        await db_session.refresh(timeslot)
+
+        return timeslot
+
+    return create_timeslot
+
     
 
 

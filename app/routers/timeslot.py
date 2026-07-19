@@ -3,7 +3,7 @@ from datetime import date
 from uuid import UUID
 from app.core.dependency import db_dependency,admin_dependency
 from app.schemas.timeslot import TimeSlotResponse,TimeSlotCreateRequest,TimeSlotPublicResponse,TimeSlotUpdateRequest
-from app.services.timeslot_services import (
+from app.services.timeslot_service import (
 create_timeslot_service,get_timeslots_service,update_timeslot_service,active_timeslot_service,deactive_timeslot_service
 )
 

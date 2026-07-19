@@ -1,7 +1,7 @@
 from app.core.dependency import db_dependency,form_data,get_current_access
 from fastapi import APIRouter,status,Depends
 from app.schemas.auth import UserRegister,Token,RefreshTokenResponse,RefreshTokenRequest
-from app.services.auth_services import register_user,login_user,refresh_access_token,logout_user
+from app.services.auth_service import register_user,login_user,refresh_access_token,logout_user
 
 
 router = APIRouter(

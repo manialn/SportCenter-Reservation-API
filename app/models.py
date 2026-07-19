@@ -1,5 +1,6 @@
 import uuid
 from app.database import Base
+from datetime import datetime, timezone
 from sqlalchemy import Column,Integer,String,Boolean,ForeignKey,DateTime,Text,Enum,Numeric,Time,Index,Date,UniqueConstraint
 from sqlalchemy.sql import func
 from sqlalchemy.dialects.postgresql import UUID
@@ -95,6 +96,7 @@ class Booking(Base, TimestampMixin):
     timeslot_id = Column(UUID(as_uuid=True), ForeignKey("timeslot.id", ondelete="CASCADE"), nullable=False, unique=True)
     booking_status = Column(Enum(BookingStatus), default=BookingStatus.PENDING, nullable=False)
     total_price = Column(Numeric(10,2), nullable=False)
+    created_at = Column(DateTime(timezone=True),default=lambda: datetime.now(timezone.utc),nullable=False,)
 
     user = relationship("User", back_populates="bookings")
     timeslot = relationship("TimeSlot", back_populates="bookings")

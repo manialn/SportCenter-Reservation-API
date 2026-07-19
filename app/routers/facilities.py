@@ -3,7 +3,7 @@ from uuid import UUID
 from typing import Optional
 from app.core.dependency import db_dependency,admin_dependency
 from app.schemas.facility import FacilityListResponse,FacilityResponse,FacilityCreateRequest,FacilityUpdateRequest
-from app.services.facility_services import (
+from app.services.facility_service import (
 get_facilities_service,get_facility_detail_service,create_facility_service,update_facility_service
 ,activate_facility_service,deactivate_facility_service)
 from app.enumsfile.enum import FacilityType

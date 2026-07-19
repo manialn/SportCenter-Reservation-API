@@ -9,7 +9,6 @@ from app.enumsfile.enum import UserRole
 from app.database import get_db
 from app.models import User
 from app.core.config import settings
-from app.core.redis_client import redis_client
 
 
 db_dependency = Annotated[AsyncSession, Depends(get_db)]
@@ -20,9 +19,6 @@ passwordbearer = OAuth2PasswordBearer(
 )
 
 
-#redis
-async def get_redis():
-    return redis_client
 #user_dependency
 async def get_current_access(token: Annotated[str, Depends(passwordbearer)], db: db_dependency):
     try:

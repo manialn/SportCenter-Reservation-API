@@ -1,7 +1,7 @@
 from app.core.dependency import db_dependency,user_dependency
 from fastapi import APIRouter,status
 from app.schemas.user import UserOut,UserVerification,ForgotPasswordRequest,ResetPasswordRequest
-from app.services.user_services import get_me_user,change_my_password,forgot_my_password,reset_my_password
+from app.services.user_service import get_me_user,change_my_password,forgot_my_password,reset_my_password
 
 router = APIRouter(
     prefix="/users"

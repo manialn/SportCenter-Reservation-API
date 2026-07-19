@@ -19,9 +19,9 @@ from app.core.redis_client import get_redis
 from app.core.security import hash_password
 from app.core.token import create_access_token, create_refresh_token
 from app.database import Base, get_db
-from app.enumsfile.enum import UserRole,FacilityType,WeekDay
+from app.enumsfile.enum import UserRole,FacilityType,WeekDay,BookingStatus
 from app.main import app
-from app.models import User,Facility,FacilitySchedule,TimeSlot
+from app.models import User,Facility,FacilitySchedule,TimeSlot,Booking
 
 
 @pytest_asyncio.fixture(scope="session")
@@ -271,6 +271,30 @@ async def timeslot_factory(db_session):
         return timeslot
 
     return create_timeslot
+
+@pytest_asyncio.fixture
+async def booking_factory(db_session):
+    async def create_booking(
+        user_id,
+        timeslot_id,
+        booking_status=BookingStatus.PENDING,
+        total_price=100,
+    ):
+        booking = Booking(
+            user_id=user_id,
+            timeslot_id=timeslot_id,
+            booking_status=booking_status,
+            total_price=total_price,
+        )
+
+        db_session.add(booking)
+
+        await db_session.commit()
+        await db_session.refresh(booking)
+
+        return booking
+
+    return create_booking
 
     
 

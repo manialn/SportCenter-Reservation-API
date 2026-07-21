@@ -19,9 +19,9 @@ from app.core.redis_client import get_redis
 from app.core.security import hash_password
 from app.core.token import create_access_token, create_refresh_token
 from app.database import Base, get_db
-from app.enumsfile.enum import UserRole,FacilityType,WeekDay,BookingStatus
+from app.enumsfile.enum import UserRole,FacilityType,WeekDay,BookingStatus,PaymentMethod,PaymentStatus
 from app.main import app
-from app.models import User,Facility,FacilitySchedule,TimeSlot,Booking
+from app.models import User,Facility,FacilitySchedule,TimeSlot,Booking,Payment
 
 
 @pytest_asyncio.fixture(scope="session")
@@ -295,6 +295,32 @@ async def booking_factory(db_session):
         return booking
 
     return create_booking
+
+@pytest_asyncio.fixture
+async def payment_factory(db_session):
+    async def create_payment(
+        booking_id,
+        amount=100,
+        payment_status=PaymentStatus.SUCCESS,
+        payment_method=PaymentMethod.MOCK_GATEWAY,
+        transaction_id=None,
+    ):
+        payment = Payment(
+            booking_id=booking_id,
+            amount=amount,
+            payment_status=payment_status,
+            payment_method=payment_method,
+            transaction_id=transaction_id or str(uuid.uuid4()),
+        )
+
+        db_session.add(payment)
+
+        await db_session.commit()
+        await db_session.refresh(payment)
+
+        return payment
+
+    return create_payment
 
     
 

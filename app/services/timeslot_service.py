@@ -5,6 +5,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.enumsfile.enum import WeekDay
 from app.models import Facility, FacilitySchedule, TimeSlot
+from app.cache.cache_service import cache_service
+from app.cache.cache_keys import CacheKeys
+from fastapi.encoders import jsonable_encoder
 from app.core.logger import get_logger, log_calls
 
 logger = get_logger(__name__)
@@ -103,6 +106,9 @@ async def create_timeslot_service(facility_id: UUID,date: date,
     await db.commit()
     await db.refresh(timeslot)
 
+    await cache_service.delete_pattern(
+    f"timeslots:{facility_id}:{date}:*")
+
     logger.info(
         "Time slot created. id=%s facility_id=%s date=%s start=%s end=%s",
         timeslot.id,
@@ -118,6 +124,15 @@ async def create_timeslot_service(facility_id: UUID,date: date,
 async def get_timeslots_service(facility_id: UUID,date: date,
     page: int,page_size: int,
     db: AsyncSession,):
+
+    cache_key = CacheKeys.timeslots(
+        str(facility_id),
+        str(date),
+        page,
+        page_size,)
+    cached_timeslots = await cache_service.get(cache_key)
+    if cached_timeslots is not None:
+        return cached_timeslots
 
     facility = await db.scalar(
         select(Facility).where(
@@ -162,8 +177,15 @@ async def get_timeslots_service(facility_id: UUID,date: date,
         page,
         page_size,
     )
+    response = jsonable_encoder(timeslots)
 
-    return timeslots
+    await cache_service.set(
+        cache_key,
+        response,
+        expire=60,
+    )
+
+    return response
 
 @log_calls
 async def update_timeslot_service(timeslot_id: UUID,date: date | None,
@@ -267,6 +289,9 @@ async def update_timeslot_service(timeslot_id: UUID,date: date | None,
     await db.commit()
     await db.refresh(timeslot)
 
+    await cache_service.delete_pattern(
+    f"timeslots:{timeslot.facility_id}:{new_date}:*")
+
     logger.info(
         "Time slot updated. id=%s facility_id=%s",
         timeslot.id,
@@ -302,6 +327,9 @@ async def active_timeslot_service(timeslot_id: UUID,db: AsyncSession,):
     await db.commit()
     await db.refresh(timeslot)
 
+    await cache_service.delete_pattern(
+    f"timeslots:{timeslot.facility_id}:{timeslot.date}:*")
+
     logger.info(
         "Time slot activated. id=%s facility_id=%s",
         timeslot.id,
@@ -334,6 +362,9 @@ async def deactive_timeslot_service(timeslot_id: UUID,db: AsyncSession,):
 
     await db.commit()
     await db.refresh(timeslot)
+
+    await cache_service.delete_pattern(
+    f"timeslots:{timeslot.facility_id}:{timeslot.date}:*")
 
     logger.info(
         "Time slot deactivated. id=%s facility_id=%s",

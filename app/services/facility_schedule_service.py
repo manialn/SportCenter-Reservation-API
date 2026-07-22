@@ -6,6 +6,9 @@ from datetime import time
 from decimal import Decimal
 from app.models import Facility, FacilitySchedule
 from app.enumsfile.enum import WeekDay
+from app.cache.cache_service import cache_service
+from app.cache.cache_keys import CacheKeys
+from fastapi.encoders import jsonable_encoder
 from app.core.logger import get_logger,log_calls
 
 logger = get_logger(__name__)
@@ -67,6 +70,9 @@ async def create_schedule_service(facility_id: UUID,day_of_week: WeekDay,
     await db.commit()
     await db.refresh(new_schedule)
 
+    await cache_service.delete(
+    CacheKeys.facility_schedule(str(facility_id)))
+
     logger.debug(
         "Schedule persisted. schedule_id=%s active=%s",
         new_schedule.id,
@@ -83,6 +89,15 @@ async def create_schedule_service(facility_id: UUID,day_of_week: WeekDay,
 
 @log_calls
 async def get_schedule_service(facility_id: UUID,db: AsyncSession):
+
+    cache_key = CacheKeys.facility_schedule(str(facility_id))
+    cached_data = await cache_service.get(cache_key)
+    if cached_data is not None:
+        logger.info(
+        "Schedules returned from cache. facility_id=%s",
+        facility_id,
+        )
+        return cached_data
 
     logger.info(
         "Fetching facility schedules. facility_id=%s",
@@ -119,8 +134,14 @@ async def get_schedule_service(facility_id: UUID,db: AsyncSession):
         facility_id,
         len(schedules_list),
     )
+    response = jsonable_encoder(schedules_list)
 
-    return schedules_list
+    await cache_service.set(
+    cache_key,
+    response,
+)
+
+    return response
 
 @log_calls
 async def update_schedule_service(schedule_id: UUID,day_of_week: WeekDay | None,
@@ -205,6 +226,9 @@ async def update_schedule_service(schedule_id: UUID,day_of_week: WeekDay | None,
     await db.commit()
     await db.refresh(schedule)
 
+    await cache_service.delete(
+    CacheKeys.facility_schedule(str(schedule.facility_id)))
+
     logger.debug(
         "Updated schedule state. schedule_id=%s day=%s open=%s close=%s duration=%s price=%s active=%s",
         schedule.id,
@@ -263,6 +287,9 @@ async def activate_schedule_service(schedule_id: UUID,db: AsyncSession):
     await db.commit()
     await db.refresh(schedule)
 
+    await cache_service.delete(
+    CacheKeys.facility_schedule(str(schedule.facility_id)))
+
     logger.info(
         "Schedule activated successfully. schedule_id=%s facility_id=%s",
         schedule.id,
@@ -309,6 +336,9 @@ async def deactivate_schedule_service(schedule_id: UUID,db: AsyncSession):
 
     await db.commit()
     await db.refresh(schedule)
+
+    await cache_service.delete(
+    CacheKeys.facility_schedule(str(schedule.facility_id)))
 
     logger.info(
         "Schedule deactivated successfully. schedule_id=%s facility_id=%s",

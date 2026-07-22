@@ -1,4 +1,4 @@
-from pydantic import BaseModel,ConfigDict,Field
+from pydantic import BaseModel,ConfigDict,Field,field_serializer
 from uuid import UUID
 from decimal import Decimal
 from app.enumsfile.enum import FacilityType
@@ -9,6 +9,9 @@ class FacilityResponse(BaseModel):
     description: str | None
     facility_type: FacilityType
     price_per_hour: Decimal
+    @field_serializer("price_per_hour")
+    def serialize_price(self, value: Decimal):
+        return f"{value:.2f}"
 
     model_config = ConfigDict(from_attributes=True)
 

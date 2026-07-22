@@ -101,8 +101,14 @@ async def client(app_lifespan, override_db):
 
 # ---------- redis ----------
 @pytest_asyncio.fixture(autouse=True)
-async def clear_redis():
+async def clear_redis(app_lifespan):
+    redis = get_redis()
+
+    await redis.flushdb()
+
     yield
+
+    await redis.flushdb()
 
 
 @pytest_asyncio.fixture

@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     REDIS_PASSWORD: str
     OTP_EXPIRE_SECONDS: int
     OTP_LENGTH: int
+    CACHE_EXPIRE_SECONDS: int
 
     model_config = SettingsConfigDict(
         env_file=ENV_FILE,

@@ -3,9 +3,12 @@ from uuid import UUID
 from sqlalchemy import select,func
 from decimal import Decimal
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.models import Facility,User
+from app.models import Facility
 from app.enumsfile.enum import FacilityType
 from app.core.logger import log_calls, get_logger
+from app.cache.cache_keys import cache_keys
+from app.cache.cache_service import cache_service
+from fastapi.encoders import jsonable_encoder
 
 logger = get_logger(__name__)
 
@@ -13,6 +16,16 @@ logger = get_logger(__name__)
 async def get_facilities_service(db: AsyncSession,page: int,
     page_size: int,search: str | None,
     facility_type: FacilityType | None):
+
+    cache_key = cache_keys.facilities(
+    page=page,
+    page_size=page_size,
+    search=search,
+    facility_type=facility_type.value if facility_type else None,
+    )
+    cached_facilities = await cache_service.get(cache_key)
+    if cached_facilities is not None:
+        return cached_facilities
 
     query = select(Facility).where(Facility.is_active.is_(True))
 
@@ -35,15 +48,28 @@ async def get_facilities_service(db: AsyncSession,page: int,
 
     facilities = result.scalars().all()
 
-    return {
-        "total": total,
-        "page": page,
-        "page_size": page_size,
-        "items": facilities,
+    response = {
+    "total": total,
+    "page": page,
+    "page_size": page_size,
+    "items": jsonable_encoder(facilities),
     }
+
+    await cache_service.set(
+        key=cache_key,
+        value=response,
+        expire=1800,
+        )
+
+    return response
 
 @log_calls
 async def get_facility_detail_service(facility_id: UUID,db: AsyncSession,):
+
+    cache_key = cache_keys.facility(str(facility_id))
+    cached_facility = await cache_service.get(cache_key)
+    if cached_facility is not None:
+        return cached_facility
 
     result = await db.execute(
         select(Facility).where(
@@ -59,8 +85,16 @@ async def get_facility_detail_service(facility_id: UUID,db: AsyncSession,):
             facility_id,
         )
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Facility not found")
+    
+    facility_data = jsonable_encoder(facility)
 
-    return facility
+    await cache_service.set(
+        key=cache_key,
+        value=facility_data,
+        expire=1800,
+    )
+
+    return facility_data
 
 @log_calls
 async def create_facility_service(name: str,description: str | None,
@@ -89,6 +123,8 @@ async def create_facility_service(name: str,description: str | None,
     db.add(facility)
     await db.commit()
     await db.refresh(facility)
+
+    await cache_service.delete_pattern("facilities:*")
 
     logger.info(
         "BUSINESS facility_created facility_id=%s name=%s type=%s price_per_hour=%s",
@@ -147,6 +183,9 @@ async def update_facility_service(facility_id: UUID,name: str | None,
     await db.commit()
     await db.refresh(facility)
 
+    await cache_service.delete(cache_keys.facility(str(facility.id)))
+    await cache_service.delete_pattern("facilities:*")
+
     logger.info(
         "BUSINESS facility_updated facility_id=%s",
         facility.id,
@@ -183,6 +222,9 @@ async def activate_facility_service(facility_id: UUID,db: AsyncSession,):
     await db.commit()
     await db.refresh(facility)
 
+    await cache_service.delete(cache_keys.facility(str(facility.id)))
+    await cache_service.delete_pattern("facilities:*")
+
     logger.info(
         "BUSINESS facility_activated facility_id=%s",
         facility.id,
@@ -218,6 +260,9 @@ async def deactivate_facility_service(facility_id: UUID,db: AsyncSession,):
 
     await db.commit()
     await db.refresh(facility)
+
+    await cache_service.delete(cache_keys.facility(str(facility.id)))
+    await cache_service.delete_pattern("facilities:*")
 
     logger.info(
         "BUSINESS facility_deactivated facility_id=%s",

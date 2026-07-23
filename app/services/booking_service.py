@@ -2,6 +2,7 @@ from uuid import UUID
 from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import IntegrityError
 from app.models import TimeSlot,Booking,Facility,FacilitySchedule,Payment,User
 from app.enumsfile.enum import BookingStatus, WeekDay
 from app.core.logger import get_logger, log_calls
@@ -106,8 +107,18 @@ async def create_booking_service(user_id: UUID,timeslot_id: UUID,
     )
 
     db.add(booking)
-
-    await db.commit()
+    try:
+        await db.commit()
+    except IntegrityError:
+        await db.rollback()
+        logger.warning(
+        "Booking creation failed due to duplicate timeslot. "
+        "timeslot_id=%s user_id=%s",
+        timeslot_id,
+        user_id,
+    )
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,detail="Time slot is already booked.")
     await db.refresh(booking)
 
     logger.info(

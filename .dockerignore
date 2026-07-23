@@ -50,3 +50,6 @@ Thumbs.db
 
 # Docker override
 docker-compose.override.yml
+
+#gitignore
+.gitignore

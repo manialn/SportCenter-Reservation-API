@@ -21,6 +21,23 @@ SportCenter Reservation API یک پروژه بک‌اند با معماری نز
 
 ---
 
+## 🌐 نسخه آنلاین
+
+این API به‌صورت عمومی روی **Render** مستقر (Deploy) شده است.
+
+**آدرس اصلی API**
+
+<https://sportcenter-reservation-api.onrender.com>
+
+**مستندات Swagger**
+
+<https://sportcenter-reservation-api.onrender.com/docs>
+
+> **توجه:** این پروژه روی نسخه رایگان Render میزبانی می‌شود. بسته به اینترنت یا ISP شما، ممکن است برای دسترسی به نسخه آنلاین نیاز به VPN داشته باشید.
+
+---
+
+
 ## ✨ قابلیت‌ها
 
 - 🔐 احراز هویت JWT (Access Token و Refresh Token)

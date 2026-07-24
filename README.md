@@ -23,6 +23,22 @@ The project is designed to be scalable and maintainable by separating business l
 
 ---
 
+## 🌐 Live Demo
+
+The API is publicly deployed on Render.
+
+**Base URL**
+
+<https://sportcenter-reservation-api.onrender.com>
+
+**Swagger Documentation**
+
+<https://sportcenter-reservation-api.onrender.com/docs>
+
+> **Note:** This project is deployed on Render's free tier. Depending on your network or ISP, a VPN may be required to access the live demo.
+
+---
+
 ## ✨ Features
 
 - 🔐 JWT Authentication (Access & Refresh Tokens)

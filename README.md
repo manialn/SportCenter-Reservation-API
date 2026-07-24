@@ -35,7 +35,7 @@ The API is publicly deployed on Render.
 
 <https://sportcenter-reservation-api.onrender.com/docs>
 
-> **Note:** This project is deployed on Render's free tier. Depending on your network or ISP, a VPN may be required to access the live demo.
+> **Note:** This project is deployed on Render's free tier, so the initial request may take a few moments while the service wakes up. Access to the live demo may also be limited in some regions or networks.
 
 ---
 

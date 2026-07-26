@@ -80,27 +80,36 @@ The API is publicly deployed on Render.
 ## 📂 Project Structure
 
 ```text
+
 .
+├── .github/
+│   └── workflows/
 ├── alembic/
 ├── app/
+│   ├── cache/
 │   ├── core/
-│   ├── database/
-│   ├── dependencies/
+│   ├── enumsfile/
 │   ├── gateways/
 │   ├── limiter/
-│   ├── middleware/
-│   ├── models/
 │   ├── routers/
 │   ├── schemas/
 │   ├── services/
-│   ├── utils/
-│   └── main.py
-├── tests/
-├── Dockerfile
+│   ├── test/
+│   ├── __init__.py
+│   ├── database.py
+│   ├── main.py
+│   └── models.py
+├── logs/
+├── .dockerignore
+├── .env.example
+├── .gitignore
+├── alembic.ini
 ├── docker-compose.yml
+├── Dockerfile
+├── pytest.ini
 ├── requirements.txt
-└── README.md
-```
+├── README.md
+└── README.fa.md
 
 ---
 
@@ -158,16 +167,22 @@ http://localhost:8000/docs
 Run all tests:
 
 ```bash
-docker compose exec app pytest
+docker compose run --rm app pytest app/test -v
+```
+
+Run a specific test file:
+
+```bash
+docker compose run --rm app pytest app/test/test_booking.py -v
 ```
 
 Run a specific test:
 
 ```bash
-docker compose exec app pytest tests/test_booking.py
+docker compose run --rm app pytest app/test/test_booking.py::test_create_booking -v
 ```
 
-The project uses a dedicated PostgreSQL test database to keep test data isolated from development data.
+The project uses a dedicated PostgreSQL test database to ensure complete isolation between development and testing data.
 
 ---
 

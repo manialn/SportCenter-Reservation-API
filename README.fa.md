@@ -81,26 +81,34 @@ SportCenter Reservation API یک پروژه بک‌اند با معماری نز
 
 ```text
 .
+├── .github/
+│   └── workflows/
 ├── alembic/
 ├── app/
+│   ├── cache/
 │   ├── core/
-│   ├── database/
-│   ├── dependencies/
+│   ├── enumsfile/
 │   ├── gateways/
 │   ├── limiter/
-│   ├── middleware/
-│   ├── models/
 │   ├── routers/
 │   ├── schemas/
 │   ├── services/
-│   ├── utils/
-│   └── main.py
-├── tests/
-├── Dockerfile
+│   ├── test/
+│   ├── __init__.py
+│   ├── database.py
+│   ├── main.py
+│   └── models.py
+├── logs/
+├── .dockerignore
+├── .env.example
+├── .gitignore
+├── alembic.ini
 ├── docker-compose.yml
+├── Dockerfile
+├── pytest.ini
 ├── requirements.txt
-└── README.md
-```
+├── README.md
+└── README.fa.md
 
 ---
 
@@ -156,19 +164,25 @@ http://localhost:8000/docs
 
 ## 🧪 اجرای تست‌ها
 
-اجرای تمامی تست‌ها:
+اجرای تمام تست‌ها:
 
 ```bash
-docker compose exec app pytest
+docker compose run --rm app pytest app/test -v
 ```
 
 اجرای یک فایل تست مشخص:
 
 ```bash
-docker compose exec app pytest tests/test_booking.py
+docker compose run --rm app pytest app/test/test_booking.py -v
 ```
 
-برای جلوگیری از تداخل اطلاعات، تست‌ها روی یک پایگاه داده PostgreSQL مجزا اجرا می‌شوند.
+اجرای یک تست مشخص:
+
+```bash
+docker compose run --rm app pytest app/test/test_booking.py::test_create_booking -v
+```
+
+این پروژه از یک پایگاه داده PostgreSQL اختصاصی برای تست‌ها استفاده می‌کند تا داده‌های محیط توسعه و تست کاملاً از یکدیگر جدا باشند.
 
 ---
 

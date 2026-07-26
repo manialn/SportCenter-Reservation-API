@@ -1,0 +1,42 @@
+name: SportCenter CI
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create .env
+        run: cp .env.example .env
+
+      - name: Build Docker image
+        run: docker compose build
+
+      - name: Start PostgreSQL and Redis
+        run: docker compose up -d db db_test redis
+
+      - name: Wait for PostgreSQL
+        run: |
+          sleep 15
+
+      - name: Run Alembic migrations
+        run: docker compose run --rm app alembic upgrade head
+
+      - name: Run Tests
+        run: docker compose run --rm app pytest app/test -v
+
+      - name: Shutdown containers
+        if: always()
+        run: docker compose down -v

@@ -23,9 +23,6 @@ class PaymentStatus(str, Enum):
 class PaymentMethod(str, Enum):
     MOCK_GATEWAY = "mock_gateway"
 
-from enum import Enum
-
-
 class WeekDay(str, Enum):
     MONDAY = "monday"
     TUESDAY = "tuesday"

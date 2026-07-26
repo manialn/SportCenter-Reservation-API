@@ -1,4 +1,4 @@
-from fastapi import APIRouter,status,Query,Depends
+from fastapi import APIRouter,status,Depends
 from uuid import UUID
 from app.core.dependency import db_dependency,user_dependency
 from app.schemas.payment import (

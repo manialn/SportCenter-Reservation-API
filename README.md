@@ -9,6 +9,7 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-blue)
 ![Redis](https://img.shields.io/badge/Redis-8-red)
 ![Docker](https://img.shields.io/badge/Docker-Compose-blue)
+[![CI](https://github.com/manialn/SportCenter-Reservation-API/actions/workflows/ci.yml/badge.svg)](https://github.com/manialn/SportCenter-Reservation-API/actions/workflows/ci.yml)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
 ---
@@ -44,6 +45,8 @@ The API is publicly deployed on Render.
 - 🔐 JWT Authentication (Access & Refresh Tokens)
 - 👤 Role-Based Authorization (Admin & User)
 - 🔑 Redis-based OTP Verification
+- ✅ GitHub Actions Continuous Integration (CI)
+- ☁️ Deployment on Render
 - 🔄 Password Reset Workflow
 - 🏟️ Facility Management
 - 📅 Weekly Schedule Management
@@ -73,7 +76,9 @@ The API is publicly deployed on Render.
 | Validation | Pydantic v2 |
 | Migrations | Alembic |
 | Testing | Pytest + HTTPX |
-| Deployment | Docker & Docker Compose |
+| Containerization | Docker & Docker Compose |
+| Deployment | Render |
+| CI | GitHub Actions |
 
 ---
 
@@ -182,6 +187,8 @@ Run a specific test:
 docker compose run --rm app pytest app/test/test_booking.py::test_create_booking -v
 ```
 
+> **Note:** The complete test suite is automatically executed on every push and pull request using GitHub Actions (CI).
+
 The project uses a dedicated PostgreSQL test database to ensure complete isolation between development and testing data.
 
 ---
@@ -223,8 +230,8 @@ See `.env.example` for the complete configuration.
 
 - Real payment gateway integration
 - SMS / Email OTP providers
-- Background task processing
-- CI/CD pipeline
+- Background task processing (Celery / RQ)
+- Continuous Deployment (CD)
 - Monitoring & Observability
 - WebSocket notifications
 - API versioning

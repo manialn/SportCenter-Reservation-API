@@ -9,6 +9,7 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-blue)
 ![Redis](https://img.shields.io/badge/Redis-8-red)
 ![Docker](https://img.shields.io/badge/Docker-Compose-blue)
+[![CI](https://github.com/manialn/SportCenter-Reservation-API/actions/workflows/ci.yml/badge.svg)](https://github.com/manialn/SportCenter-Reservation-API/actions/workflows/ci.yml)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
 ---
@@ -44,6 +45,8 @@ SportCenter Reservation API یک پروژه بک‌اند با معماری نز
 - 🔐 احراز هویت JWT (Access Token و Refresh Token)
 - 👤 مدیریت نقش کاربران (Admin و User)
 - 🔑 تأیید OTP با Redis
+- ✅ پیاده‌سازی Continuous Integration (CI) با GitHub Actions
+- ☁️ استقرار روی Render
 - 🔄 بازیابی رمز عبور
 - 🏟️ مدیریت مجموعه‌های ورزشی
 - 📅 مدیریت برنامه هفتگی مجموعه‌ها
@@ -71,9 +74,11 @@ SportCenter Reservation API یک پروژه بک‌اند با معماری نز
 | کش | Redis |
 | احراز هویت | JWT |
 | اعتبارسنجی | Pydantic v2 |
-| مهاجرت دیتابیس | Alembic |
+| مهاجرت پایگاه داده | Alembic |
 | تست | Pytest + HTTPX |
-| استقرار | Docker & Docker Compose |
+| کانتینرسازی | Docker & Docker Compose |
+| استقرار | Render |
+| یکپارچه‌سازی مداوم (CI) | GitHub Actions |
 
 ---
 
@@ -182,7 +187,9 @@ docker compose run --rm app pytest app/test/test_booking.py -v
 docker compose run --rm app pytest app/test/test_booking.py::test_create_booking -v
 ```
 
-این پروژه از یک پایگاه داده PostgreSQL اختصاصی برای تست‌ها استفاده می‌کند تا داده‌های محیط توسعه و تست کاملاً از یکدیگر جدا باشند.
+> **نکته:** تمامی تست‌های پروژه در هر Push و Pull Request به‌صورت خودکار توسط GitHub Actions (CI) اجرا می‌شوند.
+
+برای جلوگیری از تداخل داده‌های محیط توسعه و تست، پروژه از یک پایگاه داده PostgreSQL اختصاصی برای اجرای تست‌ها استفاده می‌کند.
 
 ---
 
@@ -224,7 +231,7 @@ docker compose run --rm app pytest app/test/test_booking.py::test_create_booking
 - اتصال به درگاه‌های پرداخت واقعی
 - ارسال OTP از طریق پیامک یا ایمیل
 - پردازش وظایف پس‌زمینه
-- راه‌اندازی CI/CD
+- راه‌اندازی استقرار خودکار (CD)
 - مانیتورینگ و مشاهده‌پذیری
 - اعلان‌های WebSocket
 - نسخه‌بندی API

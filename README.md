@@ -43,6 +43,8 @@ The API is publicly deployed on Render.
 ## ✨ Features
 
 - 🔐 JWT Authentication (Access & Refresh Tokens)
+- 🔄 Refresh Token Rotation & Revocation
+- 🔒 Secure Refresh Token Storage with JTI
 - 👤 Role-Based Authorization (Admin & User)
 - 🔑 Redis-based OTP Verification
 - ✅ GitHub Actions Continuous Integration (CI)
@@ -122,7 +124,7 @@ The API is publicly deployed on Render.
 
 | Module | Description |
 |---------|-------------|
-| Authentication | Login, JWT, OTP, Password Reset |
+| Authentication | Login, JWT, Refresh Token Rotation & Revocation, OTP, Password Reset |
 | Users | User management |
 | Facilities | Facility CRUD |
 | Facility Schedules | Weekly schedules |
@@ -186,6 +188,7 @@ Run a specific test:
 ```bash
 docker compose run --rm app pytest app/test/test_booking.py::test_create_booking -v
 ```
+The test suite includes asynchronous API integration tests, JWT unit tests, and Redis integration tests for caching and rate limiting.
 
 > **Note:** The complete test suite is automatically executed on every push and pull request using GitHub Actions (CI).
 
@@ -219,6 +222,7 @@ See `.env.example` for the complete configuration.
 - Layered architecture
 - Service-based business logic
 - SQLAlchemy Async ORM
+- Refresh token persistence and revocation with PostgreSQL
 - Redis for OTP, caching, and rate limiting
 - Payment abstraction with mock implementation
 - Alembic database migrations

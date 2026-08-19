@@ -1,4 +1,4 @@
-from app.core.dependency import db_dependency,form_data,get_current_access
+from app.core.dependency import db_dependency,form_data
 from fastapi import APIRouter,status,Depends
 from app.schemas.auth import UserRegister,Token,RefreshTokenResponse,RefreshTokenRequest
 from app.services.auth_service import register_user,login_user,refresh_access_token,logout_user
@@ -34,5 +34,5 @@ async def refresh(request: RefreshTokenRequest,db: db_dependency):
     return await refresh_access_token(request.refresh_token, db)
 
 @router.post("/logout",status_code=status.HTTP_200_OK)
-async def logout(current_user = Depends(get_current_access)):
-    return await logout_user()
+async def logout(request: RefreshTokenRequest,db: db_dependency):
+    return await logout_user(request.refresh_token,db)

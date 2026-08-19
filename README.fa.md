@@ -43,6 +43,8 @@
 ## ✨ قابلیت‌ها
 
 - 🔐 احراز هویت JWT (Access Token و Refresh Token)
+- 🔄 چرخش و لغو Refresh Token
+- 🔒 ذخیره امن Refresh Token با JTI
 - 👤 مدیریت نقش کاربران (Admin و User)
 - 🔑 تأیید OTP با Redis
 - ✅ پیاده‌سازی Continuous Integration (CI) با GitHub Actions
@@ -121,7 +123,7 @@
 
 | ماژول | توضیحات |
 |--------|---------|
-| احراز هویت | ورود، JWT، OTP و بازیابی رمز عبور |
+| احراز هویت | ورود، JWT، چرخش و لغو Refresh Token، OTP و بازیابی رمز عبور |
 | کاربران | مدیریت کاربران |
 | مجموعه‌های ورزشی | مدیریت اطلاعات مجموعه‌ها |
 | برنامه هفتگی | مدیریت ساعات کاری و زمان‌بندی |
@@ -186,6 +188,7 @@ docker compose run --rm app pytest app/test/test_booking.py -v
 ```bash
 docker compose run --rm app pytest app/test/test_booking.py::test_create_booking -v
 ```
+مجموعه تست‌ها شامل تست‌های Integration برای APIهای asynchronous، تست‌های Unit برای JWT و تست‌های Integration برای Cache و Rate Limiting مبتنی بر Redis است.
 
 > **نکته:** تمامی تست‌های پروژه در هر Push و Pull Request به‌صورت خودکار توسط GitHub Actions (CI) اجرا می‌شوند.
 
@@ -219,6 +222,7 @@ docker compose run --rm app pytest app/test/test_booking.py::test_create_booking
 - معماری لایه‌ای (Layered Architecture)
 - جداسازی Business Logic در Service Layer
 - استفاده از SQLAlchemy Async ORM
+- ذخیره و لغو Refresh Tokenها در PostgreSQL
 - Redis برای OTP، Cache و Rate Limiting
 - معماری انتزاعی برای درگاه پرداخت با Mock Provider
 - مدیریت نسخه دیتابیس با Alembic

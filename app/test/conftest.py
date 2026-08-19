@@ -21,7 +21,7 @@ from app.core.token import create_access_token, create_refresh_token
 from app.database import Base, get_db
 from app.enumsfile.enum import UserRole,FacilityType,WeekDay,BookingStatus,PaymentMethod,PaymentStatus
 from app.main import app
-from app.models import User,Facility,FacilitySchedule,TimeSlot,Booking,Payment
+from app.models import User,Facility,FacilitySchedule,TimeSlot,Booking,Payment,RefreshToken
 
 
 @pytest_asyncio.fixture(scope="session")
@@ -159,11 +159,21 @@ async def access_token(test_user):
 
 
 @pytest_asyncio.fixture
-async def refresh_token(test_user):
-    return create_refresh_token(
+async def refresh_token(test_user, db_session):
+    token, jti, expires_at = create_refresh_token(
         test_user.id,
         timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
     )
+
+    db_refresh_token = RefreshToken(
+        user_id=test_user.id,
+        jti=jti,
+        expires_at=expires_at)
+
+    db_session.add(db_refresh_token)
+    await db_session.commit()
+
+    return token
 
 
 @pytest_asyncio.fixture

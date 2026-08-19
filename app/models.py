@@ -23,7 +23,20 @@ class User(Base, TimestampMixin):
     role = Column(Enum(UserRole), default=UserRole.USER, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
 
+    refresh_tokens = relationship("RefreshToken",back_populates="user",cascade="all, delete-orphan",passive_deletes=True)
     bookings = relationship("Booking", back_populates="user", cascade="all, delete-orphan", passive_deletes=True)
+
+
+class RefreshToken(Base, TimestampMixin):
+    __tablename__ = "refresh_token"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True),ForeignKey("user.id", ondelete="CASCADE"),nullable=False,index=True)
+    jti = Column(UUID(as_uuid=True), nullable=False, unique=True, index=True)
+    expires_at = Column(DateTime(timezone=True), nullable=False)
+    revoked_at = Column(DateTime(timezone=True), nullable=True)
+
+    user = relationship("User", back_populates="refresh_tokens")
 
 
 class Facility(Base, TimestampMixin):

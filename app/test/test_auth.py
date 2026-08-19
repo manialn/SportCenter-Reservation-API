@@ -1,4 +1,3 @@
-from app.test.conftest import TestingSessionLocal
 from fastapi import status
 import pytest
 
@@ -49,6 +48,7 @@ async def test_register_duplicate_phone_number(client, test_user):
     assert response.json() == {"detail": "Username or phonenumber already exists"}
 
 #login
+@pytest.mark.asyncio
 async def test_successful_login_with_username(client, test_user):
     response = await client.post(
         "/auth/login",
@@ -115,10 +115,45 @@ async def test_refresh_token_success(client, refresh_token):
     )
 
     assert response.status_code == status.HTTP_200_OK
-    
+
     body = response.json()
+
     assert "access_token" in body
+    assert "refresh_token" in body
     assert body["token_type"] == "bearer"
+    assert body["refresh_token"] != refresh_token
+
+@pytest.mark.asyncio
+async def test_refresh_token_rotation(client, refresh_token):
+    response = await client.post(
+        "/auth/refresh",
+        json={
+            "refresh_token": refresh_token,
+        },
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+
+    new_refresh_token = response.json()["refresh_token"]
+
+    response = await client.post(
+        "/auth/refresh",
+        json={
+            "refresh_token": refresh_token,
+        },
+    )
+
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.json()["detail"] == "Refresh token has been revoked"
+
+    response = await client.post(
+        "/auth/refresh",
+        json={
+            "refresh_token": new_refresh_token,
+        },
+    )
+
+    assert response.status_code == status.HTTP_200_OK
 
 @pytest.mark.asyncio
 async def test_refresh_invalid_token(client):
@@ -144,27 +179,48 @@ async def test_refresh_with_access_token(client, access_token):
     assert response.json()["detail"] == "Invalid token type"
 
 @pytest.mark.asyncio
-async def test_refresh_user_not_found(client, db_session, refresh_token, test_user,):
-    await db_session.delete(test_user)
-    await db_session.commit()
+async def test_logout_success(client, refresh_token):
     response = await client.post(
-        "/auth/refresh",
+        "/auth/logout",
         json={
             "refresh_token": refresh_token,
         },
     )
-    assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.json()["detail"] == "User not found"
 
-@pytest.mark.asyncio
-async def test_logout_success(authorized_client):
-    response = await authorized_client.post("/auth/logout")
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {"message": "Logged out successfully"}
 
 @pytest.mark.asyncio
-async def test_logout_without_access_token(client):
-    response = await client.post("/auth/logout")
+async def test_logout_with_revoked_token(client, refresh_token):
+    response = await client.post(
+        "/auth/logout",
+        json={
+            "refresh_token": refresh_token,
+        },
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+
+    response = await client.post(
+        "/auth/logout",
+        json={
+            "refresh_token": refresh_token,
+        },
+    )
+
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.json() == {"detail": "Refresh token has already been revoked"}
+
+@pytest.mark.asyncio
+async def test_logout_with_invalid_token(client):
+    response = await client.post(
+        "/auth/logout",
+        json={
+            "refresh_token": "invalid_token",
+        },
+    )
+
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.json() == {"detail": "Refresh token is invalid or expired"}
 
     

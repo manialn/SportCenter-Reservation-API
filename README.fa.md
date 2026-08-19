@@ -44,7 +44,7 @@
 
 - 🔐 احراز هویت JWT (Access Token و Refresh Token)
 - 🔄 چرخش و لغو Refresh Token
-- 🔒 ذخیره امن Refresh Token با JTI
+- 🔒 مدیریت امن Refresh Token با JTI
 - 👤 مدیریت نقش کاربران (Admin و User)
 - 🔑 تأیید OTP با Redis
 - ✅ پیاده‌سازی Continuous Integration (CI) با GitHub Actions

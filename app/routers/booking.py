@@ -4,6 +4,7 @@ from app.core.dependency import db_dependency,admin_dependency,user_dependency
 from app.schemas.booking import (
     BookingResponse,BookingCreateRequest,BookingListResponse,BookingDetailResponse,BookingAdminResponse
     )
+from app.schemas.error import ErrorResponse
 from app.services.booking_service import (
     create_booking_service,get_bookings_service,get_booking_detail_service,
     cancel_booking_service,get_bookings_admin_service
@@ -15,7 +16,12 @@ router = APIRouter(
     prefix="/bookings"
 )
 
-@router.post("",status_code=status.HTTP_201_CREATED,response_model=BookingResponse)
+@router.post("",status_code=status.HTTP_201_CREATED,response_model=BookingResponse,
+    responses={
+        404: {"model": ErrorResponse,"description": "Time slot, facility, or schedule not found",},
+        409: {"model": ErrorResponse,"description": "Time slot is already booked",},
+        429: {"model": ErrorResponse,"description": "Too many booking requests",},
+    },)
 async def create_booking(request: BookingCreateRequest,user: user_dependency,
     db: db_dependency, _: None = Depends(
         RedisRateLimiter(
@@ -33,7 +39,12 @@ async def get_bookings(user: user_dependency,db: db_dependency,
     return await get_bookings_service(user_id=user.id,page=page,
         page_size=page_size,db=db)
 
-@router.patch("/{booking_id}/cancel",status_code=status.HTTP_200_OK)
+@router.patch("/{booking_id}/cancel",status_code=status.HTTP_200_OK,
+    responses={
+        404: {"model": ErrorResponse,"description": "Booking not found",},
+        409: {"model": ErrorResponse,"description": "Booking cannot be cancelled",},
+        429: {"model": ErrorResponse,"description": "Too many cancellation requests",},
+    },)
 async def cancel_booking(booking_id: UUID,user: user_dependency,
     db: db_dependency, _: None = Depends(
         RedisRateLimiter(
@@ -49,7 +60,10 @@ async def get_bookings_admin(admin: admin_dependency,db: db_dependency,
     page: int = Query(1, ge=1),page_size: int = Query(10, ge=1, le=100)):
     return await get_bookings_admin_service(page=page,page_size=page_size,db=db)
 
-@router.get("/{booking_id}",status_code=status.HTTP_200_OK,response_model=BookingDetailResponse)
+@router.get("/{booking_id}",status_code=status.HTTP_200_OK,response_model=BookingDetailResponse,
+    responses={
+        404: {"model": ErrorResponse,"description": "Booking not found",},
+    },)
 async def get_booking_detail(booking_id: UUID,user: user_dependency,
     db: db_dependency):
     return await get_booking_detail_service(booking_id=booking_id,user_id=user.id,db=db)

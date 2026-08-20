@@ -3,6 +3,7 @@ from uuid import UUID
 from typing import Optional
 from app.core.dependency import db_dependency,admin_dependency
 from app.schemas.facility import FacilityListResponse,FacilityResponse,FacilityCreateRequest,FacilityUpdateRequest
+from app.schemas.error import ErrorResponse
 from app.services.facility_service import (
 get_facilities_service,get_facility_detail_service,create_facility_service,update_facility_service
 ,activate_facility_service,deactivate_facility_service)
@@ -21,27 +22,45 @@ async def get_facilities(db: db_dependency,page: int = Query(1, ge=1),
         page_size=page_size,search=search,
         facility_type=facility_type,)
 
-@router.get("/{facility_id}",status_code=status.HTTP_200_OK,response_model=FacilityResponse)
+@router.get("/{facility_id}",status_code=status.HTTP_200_OK,response_model=FacilityResponse,
+    responses={
+        404: {"model": ErrorResponse,"description": "Facility not found",},
+    },)
 async def get_facility_detail(facility_id: UUID,db: db_dependency,):
     return await get_facility_detail_service(
         facility_id=facility_id,db=db)
 
-@router.post("",status_code=status.HTTP_201_CREATED,response_model=FacilityResponse)
+@router.post("",status_code=status.HTTP_201_CREATED,response_model=FacilityResponse,
+    responses={
+        400: {"model": ErrorResponse,"description": "Facility already exists",},
+    },)
 async def create_facilities(request: FacilityCreateRequest,admin: admin_dependency,db: db_dependency):
     return await create_facility_service(name=request.name,description=request.description,
         facility_type=request.facility_type,
         price_per_hour=request.price_per_hour,db=db)
     
-@router.patch("/{facility_id}",status_code=status.HTTP_200_OK,response_model=FacilityResponse)
+@router.patch("/{facility_id}",status_code=status.HTTP_200_OK,response_model=FacilityResponse,
+    responses={
+        400: {"model": ErrorResponse,"description": "Facility already exists",},
+        404: {"model": ErrorResponse,"description": "Facility not found",},
+    },)
 async def update_facility(facility_id: UUID,request: FacilityUpdateRequest,admin: admin_dependency,db: db_dependency):
     return await update_facility_service(facility_id=facility_id,name=request.name,
         description=request.description,facility_type=request.facility_type,
         price_per_hour=request.price_per_hour,db=db)
 
-@router.patch("/{facility_id}/activate",status_code=status.HTTP_200_OK)
+@router.patch("/{facility_id}/activate",status_code=status.HTTP_200_OK,
+    responses={
+        400: {"model": ErrorResponse,"description": "Facility is already active",},
+        404: {"model": ErrorResponse,"description": "Facility not found",},
+    },)
 async def activate_facility(facility_id: UUID,admin: admin_dependency,db: db_dependency):
     return await activate_facility_service(facility_id=facility_id,db=db)
 
-@router.patch("/{facility_id}/deactivate",status_code=status.HTTP_200_OK)
+@router.patch("/{facility_id}/deactivate",status_code=status.HTTP_200_OK,
+    responses={
+        400: {"model": ErrorResponse,"description": "Facility is already deactivated",},
+        404: {"model": ErrorResponse,"description": "Facility not found",},
+    },)
 async def deactivate_facility(facility_id: UUID,admin: admin_dependency,db: db_dependency):
     return await deactivate_facility_service(facility_id=facility_id,db=db)

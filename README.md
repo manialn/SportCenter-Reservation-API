@@ -24,6 +24,18 @@ The project is designed to be scalable and maintainable by separating business l
 
 ---
 
+## 🎯 Problem & Scenario
+
+In a real sports facility, users need a reliable way to discover available time slots and reserve them without conflicts, while facility managers need to manage facilities, schedules, and time slots.
+
+For example, a user wants to reserve a football field for a specific time. The system checks whether the facility and time slot are available, prevents double booking even when multiple requests arrive simultaneously, processes the payment, and confirms the booking after a successful payment.
+
+At the same time, administrators can manage facilities, weekly schedules, and available time slots through the API.
+
+This project solves these problems by providing a centralized reservation system with authentication, role-based authorization, concurrency-safe booking logic, payment abstraction, caching, rate limiting, and persistent data management.
+
+---
+
 ## 🌐 Live Demo
 
 The API is publicly deployed on Render.
